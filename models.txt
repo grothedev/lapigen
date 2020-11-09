@@ -1,0 +1,6 @@
+#here is a sample model definition file
+ModelName #use PascalCase pls
+-aProperty:string #after the colon, provide the datatype of this column to be written to the laravel database migration file. this will result in the following line being appended: "$table->string('aProperty');" currently column arguments are not supported
+-anotherProperty:integer
+Model2
+-size:double
