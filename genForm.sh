@@ -20,19 +20,29 @@
 # along with Laravel API Model and Form Generation Application.  If not, see <https://www.gnu.org/licenses/>.
 ###
 
-#this scripts generates the forms that one can use to create instances of models
-#takes two args: [filename of database migration of mode] [model name]
-filename=$1
-model=$2 #TODO use models.txt instead of these two args
+#this scripts generates a form that one can use to create instances of model
+#takes one arg: [model name]
+#NOTE: you will have to manually change the type of the input tag if needed
+
+model=$1
 controller="${model}Controller"
 
 form='<form role="form" method="POST" action="{{ action("'${controller}'@store") }}">\n'
 form+='{{csrf_field()}}\n'
 
+for mf in database/migrations/*; do
+    echo "checking "$mf
+    if [[ `echo $mf | sed 's/_//g' | grep -i $model` ]]; then #this is the migration file
+        filename=$mf
+    fi
+done
+
+echo "filename = "$filename
 
 while read l; do
     if [[ `echo $l | grep "Schema::create"` != "" ]]; then
         table_name=`echo $l | sed "s/Scheme::create(//" | cut -d "'" -f 2`
+        echo "table = "$table_name
         continue
     fi
     if [[ `echo $l | grep "table->"` == "" ]]; then
@@ -51,7 +61,7 @@ while read l; do
 
     form+='</div>'
 
-done < "database/migrations/"$filename
+done < $filename
 
 form+='<div class="form-group">\n'
 form+='<div class="col-md-8 col-md-offset-2">\n'
