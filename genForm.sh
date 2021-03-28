@@ -71,4 +71,8 @@ form+='</form>'
 
 #awk "/\'/,/\'/" database/migrations/$filename
 
+#TODO folder name
+#form_filename="resources/views/${model}s/create.blade.php"
+
+
 echo -e $form

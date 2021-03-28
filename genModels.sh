@@ -25,31 +25,38 @@ props=() #array of properties of model
 rprops=false #reading properties of model
 columnTypes=() #array of datatypes of the properties, in same order as props array
 model="" #the name of the model currently being constructed
-v8=`./artisan --version | cut -d' ' -f3`  #check if laravel version 8 to use app/Models/
+ver=`./artisan --version | cut -d' ' -f3`  #check if laravel version 8 to use app/Models/
 
 #runs the artisan commands to generate the files for the current model and properties and modifies the files as necessary.
 #note that global variables are used
 function makeModel {
-    ./artisan make:model --resource --migration "$model"
-    echo "arisan made resource"
-    fields=''
-    echo $props
-    for p in ${props[@]}
-    do
-        fields+="'"$p"', "
-    done
-    if [[ $v8 ]]; then
+    if [[ $ver == "8."* ]]; then
         model_filename="app/Models/${model}.php"
     else 
         model_filename="app/${model}.php"
     fi
+    
+    #check if model already exists
+    if [[ -f ${model_filename} ]]; then
+        return
+    fi
+
+    ./artisan make:model --resource --migration "$model"
+    echo "artisan made resource "${model}
+    fields=''
+    echo " with properties:"
+    for p in ${props[@]}
+    do
+        echo " "$p
+        fields+="'"$p"', "
+    done
 
     #insert fillable values into model definition file
     sed -i "s!{!{\n    protected \$fillable = [$fields];!g" ${model_filename}
 
     #insert fields into database migration file
     for mf in database/migrations/*; do
-        if [[ `echo $mf | sed 's/_//g' | grep -i $model` ]]; then #this is migration file we want to modify
+        if [[ `echo $mf | sed 's/_//g' | grep -i ${model:0:3}` ]]; then #this is migration file we want to modify
             #sed -i "s/id();/id(); \/\/TODO: fill in these fields: ${fields}/g" $mf
             for (( i=0; i<${#props[*]}; i++ )); do
                 if [[ ${columnTypes[$i]} != "" ]]; then
@@ -75,11 +82,10 @@ function addProperty {
 
 #Begin
 while read m; do
-    if [ ${m:0:1} == "#" ]; then #this line is a comment
+    if [[ -z ${m} || ${m:0:1} == "#" ]]; then #this line is a comment or blank
         continue;
     fi
     m=`echo ${m} | cut -d# -f1 | cut -d' ' -f1 ` #remove trailing comment and whitespace
-    echo "line: "${m}
     if [[ ${m:0:1} != [a-zA-Z] && ${m:0:1} != "-" ]]; then #malformed model definition file, model should only begin with a letter
         echo "this model definition file is malformed, exiting."
         echo "  \'${m}\'    "
