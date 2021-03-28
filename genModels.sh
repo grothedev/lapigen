@@ -55,7 +55,7 @@ function makeModel {
     sed -i "s!{!{\n    protected \$fillable = [$fields];!g" ${model_filename}
 
     #insert fields into database migration file
-    for mf in database/migrations/*; do
+    for mf in `ls database/migrations/*`; do
         if [[ `echo $mf | sed 's/_//g' | grep -i ${model:0:3}` ]]; then #this is migration file we want to modify
             #sed -i "s/id();/id(); \/\/TODO: fill in these fields: ${fields}/g" $mf
             for (( i=0; i<${#props[*]}; i++ )); do
@@ -85,7 +85,7 @@ while read m; do
     if [[ -z ${m} || ${m:0:1} == "#" ]]; then #this line is a comment or blank
         continue;
     fi
-    m=`echo ${m} | cut -d# -f1 | cut -d' ' -f1 ` #remove trailing comment and whitespace
+    m=`echo ${m} | cut -d# -f1 | cut -d' ' -f1` #remove trailing comment and whitespace
     if [[ ${m:0:1} != [a-zA-Z] && ${m:0:1} != "-" ]]; then #malformed model definition file, model should only begin with a letter
         echo "this model definition file is malformed, exiting."
         echo "  \'${m}\'    "
