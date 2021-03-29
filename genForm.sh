@@ -32,7 +32,7 @@ form+='{{csrf_field()}}\n'
 
 for mf in database/migrations/*; do
     echo "checking "$mf
-    if [[ `echo $mf | sed 's/_//g' | grep -i $model` ]]; then #this is the migration file
+    if [[ `echo $mf | sed 's/_//g' | grep -i ${model:0:3}` ]]; then #this is the migration file
         filename=$mf
     fi
 done
@@ -56,17 +56,16 @@ while read l; do
     #m=`echo $l | awk "/\'/,/\'/" `
 
     form+='<div class="form-group{{ $errors->has("'${attr}'") ? " has-error" : ""}}">\n'
-    form+='<label for = "'${attr}'" class = "col-me-2 control-label">'${attr}'</label>\n'
-    form+='<input type = "text" id = "'${attr}'" class = "form-control" name = "'${attr}'" value="{{ old( "'${attr}'")}}" autofocus></input>\n'
+    form+=' <label for = "'${attr}'" class = "col-me-2 control-label">'${attr}'</label>\n'
+    form+=' <input type = "text" id = "'${attr}'" class = "form-control" name = "'${attr}'" value="{{ old( "'${attr}'")}}" autofocus></input>\n'
 
-    form+='</div>'
+    form+='</div>\n'
 
 done < $filename
 
 form+='<div class="form-group">\n'
-form+='<div class="col-md-8 col-md-offset-2">\n'
-form+='<button type="submit">Submit</button>\n'
-form+='</div></div>'
+form+=' <button type="submit">Submit</button>\n'
+form+='</div>\n'
 form+='</form>'
 
 #awk "/\'/,/\'/" database/migrations/$filename

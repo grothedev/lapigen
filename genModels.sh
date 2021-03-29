@@ -116,9 +116,3 @@ while read m; do
 done < models.txt
 
 makeModel
-
-
-#What is left to do after this script runs:
-# relationships between nodes
-# controller functions code
-# TODO what else can reasonably be included in models.txt to extend automatic code generation?

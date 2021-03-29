@@ -22,8 +22,14 @@
 
 function rm_(){
     echo "  removing "${1}
-    rm ${1}
+    #rm ${1}
+    mv ${1} .lapigen_bak/ 
 }
+
+#folder to place the removed files in case of restore
+if [[ ! -f .lapigen_bak ]]; then
+    mkdir .lapigen_bak
+fi
 
 while read m; do
     if [[ -z ${m} || ${m:0:1} == "#" ]]; then #this line is a comment or blank
