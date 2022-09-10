@@ -25,12 +25,12 @@ props=() #array of properties of model
 rprops=false #reading properties of model
 columnTypes=() #array of datatypes of the properties, in same order as props array
 model="" #the name of the model currently being constructed
-ver=`./artisan --version | cut -d' ' -f3`  #check if laravel version 8 to use app/Models/
+ver=`./artisan --version | cut -d' ' -f3 | cut -d'.' -f1`  #check if laravel version >7 to use app/Models/
 
 #runs the artisan commands to generate the files for the current model and properties and modifies the files as necessary.
 #note that global variables are used
 function makeModel {
-    if [[ $ver == "8."* ]]; then
+    if [[ $((ver)) -gt 7 ]]; then
         model_filename="app/Models/${model}.php"
     else 
         model_filename="app/${model}.php"
@@ -116,3 +116,9 @@ while read m; do
 done < models.txt
 
 makeModel
+
+
+#What is left to do after this script runs:
+# relationships between nodes
+# controller functions code
+# TODO what else can reasonably be included in models.txt to extend automatic code generation?
