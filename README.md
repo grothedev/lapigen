@@ -19,6 +19,8 @@ LMoCoGen - Laravel model code generation tool
 LAPIMoCoGen - Laravel model code generation tool
 
 TODO: 
+    - field fixer script
+    - write form files 
     - validation rules
     - model relationships (is-a, has-a, etc.)
     - routes
