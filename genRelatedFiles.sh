@@ -39,7 +39,7 @@ if [[ `echo ${1} | grep -i f` ]]; then
 elif [[ `echo ${1} | grep -i c` ]]; then
     script="genControllers.sh"
 else [[ `echo ${1} | grep -i v` ]]; then
-    script="genViews.sh"
+    script="genView.sh"
 fi
 shift 1
 echo "will run "${script}
@@ -55,7 +55,7 @@ else
     done
 fi
 
-for model in $models; then
+for model in $models; do 
     ./${script} ${model}
 done
 

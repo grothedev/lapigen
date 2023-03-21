@@ -20,6 +20,10 @@
 # along with Laravel API Model and Form Generation Application.  If not, see <https://www.gnu.org/licenses/>.
 ###
 
+
+ver=`./artisan --version | cut -d' ' -f3 | cut -d'.' -f1`  #check if laravel version >7 to use app/Models/
+
+
 function rm_(){
     echo "  removing "${1}
     #rm ${1}
@@ -46,7 +50,7 @@ while read m; do
     fi
 
     echo ${m}
-    if [[ `./artisan --version | cut -d' ' -f3` == "8."* ]]; then 
+    if [[ $((ver)) -gt 7 ]]; then 
         rm_ "app/Models/${m}.php"
     else
         rm_ "app/${m}.php"

@@ -20,7 +20,14 @@ LAPIMoCoGen - Laravel model code generation tool
 
 TODO: 
     - field fixer script
-    - write form files 
+    - write form files. (edit form)
+        - use examples in controllers of tanner's site. for example ids of has-many objects 
     - validation rules
     - model relationships (is-a, has-a, etc.)
     - routes
+    - generate admin pages for editing
+    - use other models for datatype, and have the foreign key relationship generated
+
+Think about:
+    - some way of adding metadata with fields for human-compatible descriptions
+    - relations.txt: pivot tables etc.

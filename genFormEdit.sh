@@ -20,19 +20,35 @@
 # along with Laravel API Model and Form Generation Application.  If not, see <https://www.gnu.org/licenses/>.
 ###
 
-#this scripts generates a form that one can use to create instances of model
+#this scripts generates an edit form that one can use to edit existing instances of model
 #takes one arg: [model name]
 #NOTE: you will have to manually change the type of the input tag if needed
+
+if [ -z $1 ]; then
+    echo "provide the model name exactly how it is written in your model and controller filenames."
+    exit 0
+fi
 
 model=$1
 controller="${model}Controller"
 
-form='<form role="form" method="POST" action="{{ action("'${controller}'@store") }}">\n'
+if [ ! -f ./app/Models/${model}.php ]; then
+    echo "that model does not exist in this project, or you are using a custom file structure."
+    exit 0
+fi
+if [ ! -f ./app/Http/Controllers/${model}Controller.php ]; then
+    echo "the controller for that model does not exist in this project, or you are using a custom file structure."
+    exit 0
+fi
+
+form='<form role="form" method="POST" action="{{ action("'${controller}'@update", $object) }}">\n'
 form+='{{csrf_field()}}\n'
+form+='<input type="hidden" name="_method" value="PUT">\n'
 
 for mf in database/migrations/*; do
     echo "checking "$mf
-    if [[ `echo $mf | sed 's/_//g' | grep -i ${model:0:3}` ]]; then #this is the migration file
+    #find the migration file based on the model name, which could cause problems because of singular-plural situation, so use the first 4 chars, which obviously does not cover many edge cases
+    if [[ `echo $mf | sed 's/_//g' | grep -i ${model:0:4}` ]]; then
         filename=$mf
     fi
 done
@@ -57,7 +73,7 @@ while read l; do
 
     form+='<div class="form-group{{ $errors->has("'${attr}'") ? " has-error" : ""}}">\n'
     form+=' <label for = "'${attr}'" class = "col-me-2 control-label">'${attr}'</label>\n'
-    form+=' <input type = "text" id = "'${attr}'" class = "form-control" name = "'${attr}'" value="{{ old( "'${attr}'")}}" autofocus></input>\n'
+    form+=' <input type = "text" id = "'${attr}'" class = "form-control" name = "'${attr}'" value="$object->{{ ${attr} }}" autofocus></input>\n'
 
     form+='</div>\n'
 

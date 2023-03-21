@@ -60,7 +60,15 @@ function makeModel {
             #sed -i "s/id();/id(); \/\/TODO: fill in these fields: ${fields}/g" $mf
             for (( i=0; i<${#props[*]}; i++ )); do
                 if [[ ${columnTypes[$i]} != "" ]]; then
-                    sed -i "s/id();/id();\n            \$table->${columnTypes[$i]}(\'${props[$i]}\');/g" $mf
+                    if [[ ${columnTypes[$i]:0:1} =~ ^[A-Z] ]]; then #the column type is another model, because starts with a capital letter
+						fieldLC=`echo ${props[$i]} | tr '[:upper:]' '[:lower:]'`
+						fieldPlural=`./pluralize ${fieldLC} | tail -n 1`
+						
+                        sed -i "s/id();/id();\n            \$table->integer(\'${fieldLC}_id\')->unsigned()->nullable()->default(null);/g" $mf
+                        sed -i "s/default(null);/default(null);\n            \$table->foreign(\'${fieldLC}_id\')->references(\'id\')->on(\'${fieldPlural}\')->onDelete(\'cascade\');/g" $mf #this is not ideal but it will work for the time being
+                    else #column type is a normal database primitive
+                        sed -i "s/id();/id();\n            \$table->${columnTypes[$i]}(\'${props[$i]}\');/g" $mf 
+                    fi
                 else 
                     sed -i "s/id();/id();\n            \/\/TODO: ${props[$i]}/g" $mf
                 fi
