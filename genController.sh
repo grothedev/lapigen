@@ -79,6 +79,27 @@ else
 fi
 sed -i "s,store\(.*\)//,store\1${code_store}," $cf
 
-code_edit=""
+if [[ $use_auth ]]; then
+    code_edit=
+        "if (Auth::user() != null ){ //TODO other conditions
+            return view('${model}.edit', compact('${model_LC}'));
+         } else {
+            return redirect('/');
+         }"
+else
+    code_edit="return view('${model}.edit', compact('${model_LC}'));"
+fi
+sed -i "s,edit\(.*\)//,edit\1${code_edit}," $cf
 
-code_show=""
+
+if [[ $use_auth ]]; then
+    code_show=
+        "if (Auth::user() != null ){ //TODO other conditions
+            return view('${model}.show', compact('${model_LC}'));
+         } else {
+            return redirect('/');
+         }"
+else
+    code_show="return view('${model}.show', compact('${model_LC}'));"
+fi
+sed -i "s,show\(.*\)//,show\1${code_show}," $cf
