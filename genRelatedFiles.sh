@@ -29,34 +29,46 @@
 models=()
 
 if [[ -z $1 || ${1:0:1} != "-" ]]; then
-    echo "option required: specify what type of files you are generating: forms, controllers, or views (-f, -c, -v)"
+    echo "option required: specify what type of files you are generating: forms, controllers (-f, -c)"
     exit 0
 fi
 
-#conveniently, these letters are exclusive to each responsibility name
-if [[ `echo ${1} | grep -i f` ]]; then
-    script="genForms.sh"
-elif [[ `echo ${1} | grep -i c` ]]; then
-    script="genControllers.sh"
-else [[ `echo ${1} | grep -i v` ]]; then
-    script="genView.sh"
-fi
+while getopts "fcm" opt; do
+    case $opt in
+        f)
+            script="genForms.sh"
+            ;;
+        c)
+            script="genController.sh"
+            ;;
+        m)
+            script="genModel.sh"
+            ;;
+        h)
+            printhelp
+            exit 0
+            ;;
+    esac
+done
 shift 1
-echo "will run "${script}
+echo "will run "${script}". now is your time to cancel. "
+sleep 3
 
 if [[ -z $1 ]]; then
     for mf in `ls app/Models/`; do
-        models+=`echo ${mf} | sed 's/\(.*\)\.php/\1/g'`
+        #models+=(`echo ${mf} | sed 's/\(.*\)\.php/\1/g'`) #was using sed but there are better ways
+        models+=(${mf%%.*}) #cut ".php" from filename
     done
 else
     while [[ $1 ]]; do
-        models+=${1}
+        models+=(${1})
         shift 1
     done
 fi
 
-for model in $models; do 
+for model in ${models[@]}; do 
     ./${script} ${model}
+    #echo "${script} ${model}"
 done
 
 
@@ -65,3 +77,11 @@ done
 #    if [[ ${l:0:1} != [a-zA-Z] ]]; then continue; fi
 #    ./genForms.sh $l
 #done < $1
+
+function printhelp {
+    echo "Usage:  ./genRelatedFiles.sh OPTION [MODEL] ... " 
+    echo "generate the controller or form files for the given models, and write them to the appropriate paths in the laravel project."
+    echo "-c generate controllers"
+    echo "-f generate forms"
+    echo "optionally provide a list of any number of models by name, otherwise will use those already present in the project."
+}

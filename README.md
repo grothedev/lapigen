@@ -6,9 +6,10 @@ instructions:
     1. create a models-definition file (models.txt, for example) to contain the names of each of your models and properties (see the sample file for syntax)
     2. run 'genModels.sh' to generate the model files (app/Model.php) and the database migration files (datatabase/migrations/create_model_table.php) for each of your models. 
     3. if necessary, manually finish the database migration file
-    4. use 'genRelatedFiles.sh' to generate views and/or controllers for all or some models
+    4. use 'genRelatedFiles.sh' to generate the form views for REST actions and/or controllers for all or some models
     5. write code manually as needed: validation, authentication, other specific functionality, foreign database relationships, routes
 
+    TODO: genRelatedFiles.sh is unnecessary since there are only two options and genModels.sh already makes controllers. probably best to have genProject.sh that calls each script, and remove generating anything but models from genModels.sh
 
 
 Name ideas:
