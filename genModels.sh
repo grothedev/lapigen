@@ -41,18 +41,21 @@ function makeModel {
         return
     fi
 
-    ./artisan make:model --resource --migration "$model"
-    echo "artisan made resource "${model}
+    #have artisan make the model file
+    ./artisan make:model --migration "$model"
+    echo "artisan made model "${model}
+
+    #get the fields ready to add to the model definition file
     fields=''
-    echo " with properties:"
     for p in ${props[@]}
     do
-        echo " "$p
         fields+="'"$p"', "
     done
-
     #insert fillable values into model definition file
     sed -i "s!{!{\n    protected \$fillable = [$fields];!g" ${model_filename}
+
+    #make the controller
+    ./genController.sh ${model}
 
     #insert fields into database migration file
     for mf in `ls database/migrations/*`; do
@@ -73,6 +76,7 @@ function makeModel {
                     sed -i "s/id();/id();\n            \/\/TODO: ${props[$i]}/g" $mf
                 fi
             done
+            break
         fi
     done
 }
@@ -122,11 +126,10 @@ while read m; do
         model=$m
     fi
 done < models.txt
-
-makeModel
+makeModel #one more model to make
 
 
 #What is left to do after this script runs:
-# relationships between nodes
-# controller functions code
+# relationships between eloquent models 
+# 
 # TODO what else can reasonably be included in models.txt to extend automatic code generation?

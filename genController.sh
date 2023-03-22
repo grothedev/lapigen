@@ -33,16 +33,18 @@ fi
 
 cf="app/Http/Controllers/${model}Controller.php"
 
-if [[ ! -f $cf ]]; then
-    echo "no controller file: $cf"
-    echo "is capitalization correct?"
-    exit 0
+if [[ -f $cf ]]; then
+    echo "controller file ${cf} already exists. are you sure? (y/n)"
+    read c
+    if [[ ! ${c,,} == 'y' ]]; then
+        echo "ok. exiting."
+        exit 0
+    fi
 fi
+cp Controller.template.php $cf
 
 model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
 model_plural=`./pluralize ${model_LC} | tail -n 1`
-
-cp Controller.template.php $cf
 
 sed -i "s/--model--/${model}/g" $cf
 sed -i "s/--model_lowercase--/${model_LC}/g" $cf
