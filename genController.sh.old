@@ -1,0 +1,115 @@
+#!/bin/bash
+
+###
+# Laravel API Model and Form Generation Application
+# Copyright (C) 2020 Thomas Grothe, grothedev@gmail.com
+
+# This file is part of Laravel API Model and Form Generation Application.
+
+# Laravel API Model and Form Generation Application is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Laravel API Model and Form Generation Application is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Laravel API Model and Form Generation Application.  If not, see <https://www.gnu.org/licenses/>.
+###
+
+## !!! This is a deprecated version of the script !!! ###
+##     The method in this script was to write chunks of text to the laravel-generated file, using linux "here document" syntax.  ##
+##     I decided it better to use a template file on which to call "sed" to write the appropriate values ##
+
+#this script will insert the appropriate text into the controller file of the given model
+#TODO: custom redirect upon unauth
+#TODO: does laravel generate plural view files or what?
+
+
+use_auth=True
+
+if [[ $1 ]]; then
+    model=$1
+else
+    echo "provide a model name as arg"
+    exit 0
+fi
+
+cf="app/Http/Controllers/${model}Controller.php"
+
+if [[ ! -f $cf ]]; then
+    echo "no controller file: $cf"
+    echo "is capitalization correct?"
+    exit 0
+fi
+
+model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
+model_plural=`./pluralize ${model_LC} | tail -n 1`
+
+#index
+code_index="\$m = ${model}::all();\nreturn view('${model}.index'\, compact('${model}');"
+#echo $code_index
+sed -i "s,index\(.*\)//,index\1${code_index}," $cf
+
+if [[ $use_auth ]]; then
+    code_create=$(cat <<EOF
+        if (Auth::user() != null ){ //TODO other conditions
+            return view('${model}.create');
+         } else {
+            return redirect('/');
+         }
+        EOF
+        )
+else
+    code_create="return view('${model}.create');"
+fi
+sed -i "s,create\(.*\)//,create\1${code_create}," $cf
+
+if [[ $use_auth ]]; then
+    code_store=`cat << EOF
+        if (Auth::user() != null ){ //TODO other conditions
+            \$request->validate([]); //TODO validation rules
+            \$m = ${model}::create([]); //TODO fields
+            return json_encode(\$m);
+         } else {
+            return redirect('/');
+         }
+         EOF`
+else
+    code_store=`cat << EOF
+            \$request->validate([]); //TODO validation rules
+            \$m = ${model}::create([]); //TODO fields
+            return json_encode(\$m);
+            EOF`
+fi
+sed -i "s,store\(.*\)//,store\1${code_store}," $cf
+
+if [[ $use_auth ]]; then
+    code_edit=`cat << EOF
+        if (Auth::user() != null ){ //TODO other conditions
+            return view('${model}.edit', compact('${model_LC}'));
+         } else {
+            return redirect('/');
+         }
+         EOF`
+else
+    code_edit="return view('${model}.edit', compact('${model_LC}'));"
+fi
+sed -i "s,edit\(.*\)//,edit\1${code_edit}," $cf
+
+
+if [[ $use_auth ]]; then
+    code_show=`cat << EOF
+        if (Auth::user() != null ){ //TODO other conditions
+            return view('${model}.show', compact('${model_LC}'));
+         } else {
+            return redirect('/');
+         }
+         EOF`
+else
+    code_show="return view('${model}.show', compact('${model_LC}'));"
+fi
+sed -i "s,show\(.*\)//,show\1${code_show}," $cf

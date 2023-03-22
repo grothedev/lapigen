@@ -24,9 +24,6 @@
 #TODO: custom redirect upon unauth
 #TODO: does laravel generate plural view files or what?
 
-
-use_auth=True
-
 if [[ $1 ]]; then
     model=$1
 else
@@ -45,61 +42,10 @@ fi
 model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
 model_plural=`./pluralize ${model_LC} | tail -n 1`
 
-#index
-code_index="\$m = ${model}::all();\nreturn view('${model}.index'\, compact('${model}');"
-#echo $code_index
-sed -i "s,index\(.*\)//,index\1${code_index}," $cf
+cp Controller.template.php $cf
 
-if [[ $use_auth ]]; then
-    code_create=
-        "if (Auth::user() != null ){ //TODO other conditions
-            return view('${model}.create');
-         } else {
-            return redirect('/');
-         }"
-else
-    code_create="return view('${model}.create');"
-fi
-sed -i "s,create\(.*\)//,create\1${code_create}," $cf
-
-if [[ $use_auth ]]; then
-    code_store=
-        "if (Auth::user() != null ){ //TODO other conditions
-            \$request->validate([]); //TODO validation rules
-            \$m = ${model}::create([]); //TODO fields
-            return json_encode(\$m);
-         } else {
-            return redirect('/');
-         }"
-else
-    code_store=
-            "\$request->validate([]); //TODO validation rules
-            \$m = ${model}::create([]); //TODO fields
-            return json_encode(\$m);"
-fi
-sed -i "s,store\(.*\)//,store\1${code_store}," $cf
-
-if [[ $use_auth ]]; then
-    code_edit=
-        "if (Auth::user() != null ){ //TODO other conditions
-            return view('${model}.edit', compact('${model_LC}'));
-         } else {
-            return redirect('/');
-         }"
-else
-    code_edit="return view('${model}.edit', compact('${model_LC}'));"
-fi
-sed -i "s,edit\(.*\)//,edit\1${code_edit}," $cf
-
-
-if [[ $use_auth ]]; then
-    code_show=
-        "if (Auth::user() != null ){ //TODO other conditions
-            return view('${model}.show', compact('${model_LC}'));
-         } else {
-            return redirect('/');
-         }"
-else
-    code_show="return view('${model}.show', compact('${model_LC}'));"
-fi
-sed -i "s,show\(.*\)//,show\1${code_show}," $cf
+sed -i "s/--model--/${model}/g" $cf
+sed -i "s/--model_lowercase--/${model_LC}/g" $cf
+sed -i "s/--model_plural--/${model_plural}/g" $cf
+sed -i "s/^ *--.*-- *$//g" $cf #remove lines that start & end with "--", accounting for whitespace
+echo "Done."

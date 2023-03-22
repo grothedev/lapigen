@@ -11,6 +11,10 @@ instructions:
 
     TODO: genRelatedFiles.sh is unnecessary since there are only two options and genModels.sh already makes controllers. probably best to have genProject.sh that calls each script, and remove generating anything but models from genModels.sh
 
+how this works:
+    1. calls "artisan //TODO
+
+    3. uses template files, such as "Controller.template.php" to copy into the project, rename, and replace the variables with the correct values, such as model or field
 
 Name ideas:
 
@@ -20,6 +24,11 @@ LMoCoGen - Laravel model code generation tool
 LAPIMoCoGen - Laravel model code generation tool
 
 TODO: 
+    - controller generation: authentication conditions. pass username or bool field of User into script?\
+        - how redirections are specified
+        - write the unauthorized page
+        - should i actually use the laravel FormRequest, Validator, etc.?
+    - routes. use lowercase singular since the transformation is easier. though could also have plural redunancy. 
     - field fixer script
     - write form files. (edit form)
         - use examples in controllers of tanner's site. for example ids of has-many objects 
@@ -32,3 +41,4 @@ TODO:
 Think about:
     - some way of adding metadata with fields for human-compatible descriptions
     - relations.txt: pivot tables etc.
+    - look into using laravel Component, which is in app/View/Components/  
