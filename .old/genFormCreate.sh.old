@@ -30,8 +30,19 @@ if [ -z $1 ]; then
 fi
 
 model=$1
+controller="${model}Controller"
 
-#TO use migrations or models.txt?
+if [ ! -f ./app/Models/${model}.php ]; then
+    echo "that model does not exist in this project, or you are using a custom file structure."
+    exit 0
+fi
+if [ ! -f ./app/Http/Controllers/${model}Controller.php ]; then
+    echo "the controller for that model does not exist in this project, or you are using a custom file structure."
+    exit 0
+fi
+
+form='<form role="form" method="POST" action="{{ action("'${controller}'@store") }}">\n'
+form+='{{csrf_field()}}\n'
 
 for mf in database/migrations/*; do
     echo "checking "$mf
@@ -40,3 +51,42 @@ for mf in database/migrations/*; do
         filename=$mf
     fi
 done
+
+echo "filename = "$filename
+
+while read l; do
+    if [[ `echo $l | grep "Schema::create"` != "" ]]; then
+        table_name=`echo $l | sed "s/Scheme::create(//" | cut -d "'" -f 2`
+        echo "table = "$table_name
+        continue
+    fi
+    if [[ `echo $l | grep "table->"` == "" ]]; then
+        continue
+    fi
+    if [[ `echo $l | grep "'"` == "" ]]; then
+        continue
+    fi
+    l=`echo $l | sed "s/.*table->(//g" `
+    attr=`echo $l | cut -d "'" -f 2`
+    #m=`echo $l | awk "/\'/,/\'/" `
+
+    form+='<div class="form-group{{ $errors->has("'${attr}'") ? " has-error" : ""}}">\n'
+    form+=' <label for = "'${attr}'" class = "col-me-2 control-label">'${attr}'</label>\n'
+    form+=' <input type = "text" id = "'${attr}'" class = "form-control" name = "'${attr}'" value="{{ old( "'${attr}'")}}" autofocus></input>\n'
+
+    form+='</div>\n'
+
+done < $filename
+
+form+='<div class="form-group">\n'
+form+=' <button type="submit">Submit</button>\n'
+form+='</div>\n'
+form+='</form>'
+
+#awk "/\'/,/\'/" database/migrations/$filename
+
+#TODO folder name
+#form_filename="resources/views/${model}s/create.blade.php"
+
+
+echo -e $form

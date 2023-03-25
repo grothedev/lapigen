@@ -41,7 +41,7 @@ if [[ -f $cf ]]; then
         exit 0
     fi
 fi
-cp Controller.template.php $cf
+cp templates/Controller.template.php $cf
 
 model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
 model_plural=`./pluralize ${model_LC} | tail -n 1`
