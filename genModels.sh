@@ -59,16 +59,20 @@ function makeModel {
 
     #insert fields into database migration file
     for mf in `ls database/migrations/*`; do
-        if [[ `echo $mf | sed 's/_//g' | grep -i ${model:0:3}` ]]; then #this is migration file we want to modify
+        model_plural=`./pluralize ${model} | tail -n 1`
+        if [[ `echo $mf | sed 's/_//g' | grep -i ${model_plural}` ]]; then #this is migration file we want to modify
             #sed -i "s/id();/id(); \/\/TODO: fill in these fields: ${fields}/g" $mf
             for (( i=0; i<${#props[*]}; i++ )); do
                 if [[ ${columnTypes[$i]} != "" ]]; then
                     if [[ ${columnTypes[$i]:0:1} =~ ^[A-Z] ]]; then #the column type is another model, because starts with a capital letter
 						fieldLC=`echo ${props[$i]} | tr '[:upper:]' '[:lower:]'`
 						fieldPlural=`./pluralize ${fieldLC} | tail -n 1`
-						
-                        sed -i "s/id();/id();\n            \$table->integer(\'${fieldLC}_id\')->unsigned()->nullable()->default(null);/g" $mf
-                        sed -i "s/default(null);/default(null);\n            \$table->foreign(\'${fieldLC}_id\')->references(\'id\')->on(\'${fieldPlural}\')->onDelete(\'cascade\');/g" $mf #this is not ideal but it will work for the time being
+						datatypeLC=`echo ${columnTypes[$i]} | tr '[:upper:]' '[:lower:]'`
+                        datatypePlural=`./pluralize ${datatypeLC} | tail -n 1`
+
+                        #TODO is this ever a pivot table? 
+                        sed -i "s/id();/id();\n            \$table->integer(\'${fieldLC}\')->unsigned()->nullable()->default(null);/g" $mf
+                        sed -i "s/default(null);/default(null);\n            \$table->foreign(\'${fieldLC}\')->references(\'id\')->on(\'${datatypePlural}\')->onDelete(\'cascade\');/g" $mf #this is not ideal but it will work for the time being
                     else #column type is a normal database primitive
                         sed -i "s/id();/id();\n            \$table->${columnTypes[$i]}(\'${props[$i]}\');/g" $mf 
                     fi
