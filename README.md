@@ -3,6 +3,7 @@ Laravel API Model and Form Generation Application
 this is a set of software development tools used to generate code for laravel APIs. after using laravel to write a handful of APIs, i found myself repeating the same boilerplate code multiple times, so i wrote some scripts to write as much of that for me as possible. 
 
 instructions:
+
     1. create a models-definition file (models.txt, for example) to contain the names of each of your models and properties (see the sample file for syntax)
     2. run 'genModels.sh' to generate the model files (app/Model.php) and the database migration files (datatabase/migrations/create_model_table.php) for each of your models. 
     3. if necessary, manually finish the database migration file
@@ -12,9 +13,11 @@ instructions:
     TODO: genRelatedFiles.sh is unnecessary since there are only two options and genModels.sh already makes controllers. probably best to have genProject.sh that calls each script, and remove generating anything but models from genModels.sh
 
 how this works:
-    1. calls "artisan //TODO
 
+    1. calls "artisan make:model" to make default model and migration files
+    2. replaces and inserts the appropriate text in those files
     3. uses template files, such as "Controller.template.php" to copy into the project, rename, and replace the variables with the correct values, such as model or field
+    4. leaves "//TODO" comments where developer must pick up
 
 Name ideas:
 
