@@ -52,7 +52,8 @@ function makeModel {
         fields+="'"$p"', "
     done
     #insert fillable values into model definition file
-    sed -i "s!{!{\n    protected \$fillable = [$fields];!g" ${model_filename}
+    #sed -i "s!{!{\n    protected \$fillable = [$fields];!g" ${model_filename}
+    sed -i "s!}!    protected \$fillable = [$fields];\n\n}!g" ${model_filename}
 
     #make the controller
     ./genController.sh ${model}
@@ -73,6 +74,9 @@ function makeModel {
                         #TODO is this ever a pivot table? 
                         sed -i "s/id();/id();\n            \$table->integer(\'${fieldLC}\')->unsigned()->nullable()->default(null);/g" $mf
                         sed -i "s/default(null);/default(null);\n            \$table->foreign(\'${fieldLC}\')->references(\'id\')->on(\'${datatypePlural}\')->onDelete(\'cascade\');/g" $mf #this is not ideal but it will work for the time being
+
+                        #insert the model relation function
+                        sed -i "s!}!    public function ${fieldLC}(){\n        return \$this->hasOne('App\\Models\\${columnTypes[$i]}');\n    }\n\n}!g" ${model_filename}
                     else #column type is a normal database primitive
                         sed -i "s/id();/id();\n            \$table->${columnTypes[$i]}(\'${props[$i]}\');/g" $mf 
                     fi
