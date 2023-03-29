@@ -97,6 +97,11 @@ declare -A fields #=()
 declare -A types #=()
 
 if [[ ${use_migration} ]]; then
+    if [[ ! -f resources/views/${model_LC} ]]; then
+        mkdir -p resources/views/${model_LC}
+    fi
+    cp templates/form_create.template.html $formFile
+    
     getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\)` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
     IFS='$'
     for line in ${getfieldsresult}; do
@@ -105,17 +110,9 @@ if [[ ${use_migration} ]]; then
         if [[ ! $f =~ ^[A-Za-z0-9]* ]]; then continue; fi
         fields+=($f)
         types+=($t)
-    done
-    
-    if [[ ! -f resources/views/${model_LC} ]]; then
-        mkdir -p resources/views/${model_LC}
-    fi
-    cp templates/form_create.template.html $formFile
-    for i in $(seq 0 ${#fields[@]}); do
-        echo $i
-        echo ${fields[$i]}
-        echo "inserting "${fields[$i]}", "${types[$i]}
-        insertInput ${types[$i]} ${fields[$i]}
+
+        echo "inserting "$f", "$t
+        insertInput $t $f
     done
 else
     echo "did not find migration file. using models.txt file. THIS FUNCTIONALITY IS CURRENTLY NOT FULLY IMPLEMENTED"
