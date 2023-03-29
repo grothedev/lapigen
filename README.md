@@ -35,6 +35,7 @@ TODO:
     - field fixer script
     - write form files. (edit form)
         - use examples in controllers of tanner's site. for example ids of has-many objects 
+        - i think create & edit are really the same except for a few small differences. so make them one script
     - validation rules
     - model relationships (is-a, has-a, etc.)
     - routes

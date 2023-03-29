@@ -20,74 +20,117 @@
 # along with Laravel API Model and Form Generation Application.  If not, see <https://www.gnu.org/licenses/>.
 ###
 
-#this scripts generates an edit form that one can use to edit existing instances of model
+#this scripts generates a form that one can use to edit existing instances of model
 #takes one arg: [model name]
 #NOTE: you will have to manually change the type of the input tag if needed
 
+### GLOBAL VARIABLES ###
+#map table column types (from migration file) to html input tags
+declare -A htmlInputTypes
+htmlInputTypes["integer"]="number"
+htmlInputTypes["float"]="number"
+htmlInputTypes["string"]="text"
+htmlInputTypes["dateTime"]="datetime-local"
+
+htmlInputTemplate=`cat templates/input_simple.template.html`
+htmlTextAreaTemplate=`cat templates/input_textarea.template.html`
+htmlFormCreateTemplate=`cat templates/input_simple.template.html`
+
+model=$1
+model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
+model_plural=`./pluralize ${model_LC} | tail -n 1`
+
+### FUNCTIONS ###
+#insert input element into the form html file
+#args: [input type] [input name]
+function insertInput {
+    if [[ -z $1 && -z $2 ]]; then return -1; fi
+    sed '/csrf_field/a \n${htmlInputTemplate}' 
+}
+
+
+
+### PROGRAM ###
 if [ -z $1 ]; then
     echo "provide the model name exactly how it is written in your model and controller filenames."
     exit 0
 fi
 
-model=$1
-controller="${model}Controller"
+#TO use migrations or models.txt?
 
-if [ ! -f ./app/Models/${model}.php ]; then
-    echo "that model does not exist in this project, or you are using a custom file structure."
-    exit 0
+model_file="app/Models/${model}.php"
+if [[ ! -f $model_file ]]; then
+    echo "model file does not exist in app/Models/ , continue? (y/n)"
+    read c
+    if [[ ! ${c,,} == 'y' ]]; then
+        echo "ok. exiting."
+        exit 0
+    fi
 fi
-if [ ! -f ./app/Http/Controllers/${model}Controller.php ]; then
-    echo "the controller for that model does not exist in this project, or you are using a custom file structure."
-    exit 0
-fi
 
-form='<form role="form" method="POST" action="{{ action("'${controller}'@update", $object) }}">\n'
-form+='{{csrf_field()}}\n'
-form+='<input type="hidden" name="_method" value="PUT">\n'
-
-for mf in database/migrations/*; do
-    echo "checking "$mf
-    #find the migration file based on the model name, which could cause problems because of singular-plural situation, so use the first 4 chars, which obviously does not cover many edge cases
-    if [[ `echo $mf | sed 's/_//g' | grep -i ${model:0:4}` ]]; then
-        filename=$mf
+for f in `ls database/migrations/ `; do
+    fNoUnderscore=`echo ${f} | sed 's/_//g'`
+    if [[ $fNoUnderscore == *${model_plural}* ]]; then
+        migration_file="database/migrations/"${f}
     fi
 done
+echo $migration_file
 
-echo "filename = "$filename
-
-while read l; do
-    if [[ `echo $l | grep "Schema::create"` != "" ]]; then
-        table_name=`echo $l | sed "s/Scheme::create(//" | cut -d "'" -f 2`
-        echo "table = "$table_name
-        continue
+if [[ ! -f ${migration_file} ]]; then
+    echo "migration file does not exist in app/Models/ , continue? (y/n)"
+    read c
+    if [[ ! ${c,,} == 'y' ]]; then
+        echo "ok. exiting."
+        exit 0
     fi
-    if [[ `echo $l | grep "table->"` == "" ]]; then
-        continue
+    use_migration=false
+else
+    use_migration=true #get fields from migration file instead of models
+fi
+
+#model fields/attributes and their datatypes
+fields=()
+types=()
+
+if [[ ${use_migration} ]]; then
+    getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\)` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
+    #IFS='$'
+    for line in ${getfieldsresult}; do
+        f=`echo $line | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g"`
+        t=`echo $line | sed "s/.*\>\([A-Za-z]\)(.*/\1/g"`
+        fields+=($f)
+        types+=($t)
+    done
+    if [[ ! -f resources/views/${model_LC} ]]; then
+        mkdir -p resources/views/${model_LC}
     fi
-    if [[ `echo $l | grep "'"` == "" ]]; then
-        continue
-    fi
-    l=`echo $l | sed "s/.*table->(//g" `
-    attr=`echo $l | cut -d "'" -f 2`
-    #m=`echo $l | awk "/\'/,/\'/" `
+    cp templates/form_edit.template.html resources/views/${model_LC}/edit.blade.php
+    for i in ${fields[#]}; do
+        echo "inserting "$fields[$i]", "$types[$1]
+        insertInput $f
+    done
+else
+    foundmodel=false
+    while read m; do
+        if [[ -z ${m} || ${m:0:1} == "#" ]]; then #this line is a comment or blank
+            continue;
+        fi
+        m=`echo ${m} | cut -d# -f1 | cut -d' ' -f1` #remove trailing comment and whitespace
+        if [[ ${m:0:1} != [a-zA-Z] && ${m:0:1} != "-" ]]; then #malformed model definition file, model should only begin with a letter
+            echo "this model definition file is malformed, exiting."
+            echo "  \'${m}\'    "
+            exit -1
+        fi
+        if [[ ! $foundmodel && $m == $model ]]; then
+            foundmodel=true
+        else
+            continue
+        fi
+        if [[ ${m:0:1} == '-' ]]; then
+            ${fields}+=${m:1}
+        fi
 
-    form+='<div class="form-group{{ $errors->has("'${attr}'") ? " has-error" : ""}}">\n'
-    form+=' <label for = "'${attr}'" class = "col-me-2 control-label">'${attr}'</label>\n'
-    form+=' <input type = "text" id = "'${attr}'" class = "form-control" name = "'${attr}'" value="$object->{{ ${attr} }}" autofocus></input>\n'
+    done < models.txt
+    echo $fields
+fi
 
-    form+='</div>\n'
-
-done < $filename
-
-form+='<div class="form-group">\n'
-form+=' <button type="submit">Submit</button>\n'
-form+='</div>\n'
-form+='</form>'
-
-#awk "/\'/,/\'/" database/migrations/$filename
-
-#TODO folder name
-#form_filename="resources/views/${model}s/create.blade.php"
-
-
-echo -e $form

@@ -24,9 +24,36 @@
 #takes one arg: [model name]
 #NOTE: you will have to manually change the type of the input tag if needed
 
+### GLOBAL VARIABLES ###
+#map table column types (from migration file) to html input tags
+declare -A htmlInputTypes
+htmlInputTypes["integer"]="number"
+htmlInputTypes["float"]="number"
+htmlInputTypes["string"]="text"
+htmlInputTypes["dateTime"]="datetime-local"
+
+htmlInputTemplate=`cat templates/input_simple.template.html`
+htmlTextAreaTemplate=`cat templates/input_textarea.template.html`
+htmlFormCreateTemplate=`cat templates/input_simple.template.html`
+
+model=$1
+model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
+model_plural=`./pluralize ${model_LC} | tail -n 1`
+formFile="resources/views/${model_LC}/create.blade.php"
+
+### FUNCTIONS ###
 #insert input element into the form html file
+#args: [input type] [input name] [input label (optional)]
 function insertInput {
-    if [[ -z $1 ]]; then return -1; fi
+    if [[ -z $1 && -z $2 ]]; then return -1; fi
+    sed -i "/csrf_field/a \n${htmlInputTemplate}" $formFile
+    sed -i "s/--field--/${2}/g" $formFile
+    sed -i "s/--input_type--/${1}/g" $formFile
+    if [[ $3 ]]; then
+        sed -i "s/--field_label--/${3}/g" $formFile
+    else
+        sed -i "s/--field_label--/${2}/g" $formFile
+    fi
 }
 
 if [ -z $1 ]; then
@@ -34,12 +61,7 @@ if [ -z $1 ]; then
     exit 0
 fi
 
-model=$1
-model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
-model_plural=`./pluralize ${model_LC} | tail -n 1`
-
 #TO use migrations or models.txt?
-
 model_file="app/Models/${model}.php"
 if [[ ! -f $model_file ]]; then
     echo "model file does not exist in app/Models/ , continue? (y/n)"
@@ -71,24 +93,32 @@ else
 fi
 
 #model fields/attributes
-fields=()
+declare -A fields #=()
+declare -A types #=()
 
 if [[ ${use_migration} ]]; then
     getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\)` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
-    #IFS='$'
-    for field in ${getfieldsresult}; do
-        f=`echo $field | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"`
+    IFS='$'
+    for line in ${getfieldsresult}; do
+        f=`echo $line | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g" | head -n 1`
+        t=`echo $line | sed "s/.*>\([A-Za-z]*\)(.*/\1/g" | head -n 1`
+        if [[ ! $f =~ ^[A-Za-z0-9]* ]]; then continue; fi
         fields+=($f)
+        types+=($t)
     done
+    
     if [[ ! -f resources/views/${model_LC} ]]; then
         mkdir -p resources/views/${model_LC}
     fi
-    cp templates/form_create.template.html resources/views/${model_LC}/create.blade.php
-    for f in ${fields[*]}; do
-        echo "inserting "$f
-        #insertInput $f
+    cp templates/form_create.template.html $formFile
+    for i in $(seq 0 ${#fields[@]}); do
+        echo $i
+        echo ${fields[$i]}
+        echo "inserting "${fields[$i]}", "${types[$i]}
+        insertInput ${types[$i]} ${fields[$i]}
     done
 else
+    echo "did not find migration file. using models.txt file. THIS FUNCTIONALITY IS CURRENTLY NOT FULLY IMPLEMENTED"
     foundmodel=false
     while read m; do
         if [[ -z ${m} || ${m:0:1} == "#" ]]; then #this line is a comment or blank

@@ -80,7 +80,7 @@ function makeModel {
                     else #column type is a normal database primitive
                         sed -i "s/id();/id();\n            \$table->${columnTypes[$i]}(\'${props[$i]}\');/g" $mf 
                     fi
-                else 
+                else
                     sed -i "s/id();/id();\n            \/\/TODO: ${props[$i]}/g" $mf
                 fi
             done
