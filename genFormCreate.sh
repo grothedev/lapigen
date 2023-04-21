@@ -114,6 +114,7 @@ if [[ ${use_migration} ]]; then
         echo "inserting "$f", "$t
         insertInput $t $f
     done
+    sed -i 's/--submit_label--/Create/g' $formFile
     exit 0
 else
     echo "did not find migration file. using models.txt file. THIS FUNCTIONALITY IS CURRENTLY NOT FULLY IMPLEMENTED"
