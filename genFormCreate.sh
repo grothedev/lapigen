@@ -107,10 +107,10 @@ if [[ ${use_migration} ]]; then
     for line in ${getfieldsresult}; do
         f=`echo "$line" | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g" | head -n 1`
         t=`echo "$line" | sed "s/.*>\([A-Za-z]*\)(.*/\1/g" | head -n 1`
-        if [[ ! $f =~ ^[A-Za-z0-9]* ]]; then continue; fi
+        if [[ ! $f =~ ^[A-Za-z0-9]* || $f =~ [\ ] ]]; then continue; fi
+        echo $f" valid"
         fields+=($f)
         types+=($t)
-
         echo "inserting "$f", "$t
         insertInput $t $f
     done
