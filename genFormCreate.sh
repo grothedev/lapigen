@@ -46,7 +46,7 @@ formFile="resources/views/${model_LC}/create.blade.php"
 #args: [input type] [input name] [input label (optional)]
 function insertInput {
     if [[ -z $1 && -z $2 ]]; then return -1; fi
-    sed -i "/csrf_field/a \n${htmlInputTemplate}" $formFile
+    sed -i "/csrf_field/r templates/input_simple.template.html" $formFile
     sed -i "s/--field--/${2}/g" $formFile
     sed -i "s/--input_type--/${1}/g" $formFile
     if [[ $3 ]]; then
@@ -102,11 +102,11 @@ if [[ ${use_migration} ]]; then
     fi
     cp templates/form_create.template.html $formFile
     
-    getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\)` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
+    getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\) | tr -d '\n'` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
     IFS='$'
     for line in ${getfieldsresult}; do
-        f=`echo $line | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g" | head -n 1`
-        t=`echo $line | sed "s/.*>\([A-Za-z]*\)(.*/\1/g" | head -n 1`
+        f=`echo "$line" | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g" | head -n 1`
+        t=`echo "$line" | sed "s/.*>\([A-Za-z]*\)(.*/\1/g" | head -n 1`
         if [[ ! $f =~ ^[A-Za-z0-9]* ]]; then continue; fi
         fields+=($f)
         types+=($t)
@@ -114,6 +114,7 @@ if [[ ${use_migration} ]]; then
         echo "inserting "$f", "$t
         insertInput $t $f
     done
+    exit 0
 else
     echo "did not find migration file. using models.txt file. THIS FUNCTIONALITY IS CURRENTLY NOT FULLY IMPLEMENTED"
     foundmodel=false
