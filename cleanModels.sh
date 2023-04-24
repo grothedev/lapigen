@@ -58,5 +58,4 @@ while read m; do
     migrationfile=`ls database/migrations/ | grep -i ${m:0:3}` #first few chars in case of plural spelling complication
     if [[ $migrationfile ]]; then rm_ "database/migrations/${migrationfile}"; fi
     rm_ "app/Http/Controllers/${m}Controller.php"
-
 done < models.txt

@@ -20,40 +20,18 @@
 # along with Laravel API Model and Form Generation Application.  If not, see <https://www.gnu.org/licenses/>.
 ###
 
-#this script generates views for the given model, using lowercase model name standard, not pluralized
+#this script generates views for managing the given model
 
 # args:
 #   1: model name
 
 dir_views="resources/views/" #directory where views are stored
 
-if [[ -z $1 ]]; then
-    echo "provide the model name as arg"
-    exit 0
-else
+while read m; do
 
-m=${1} #da model
+    ./genFormCreate.sh ${m}
+    ./genFormEdit.sh ${m}
+    #./genFormIndex.sh ${m}
+    #./genFormShow.sh ${m}
 
-view_dirname=`tr '[:upper:]' '[:lower:]' ${m}`
-dir=${dir_views}${view_dirname}
-mkdir ${dir}
-#TODO: check if exists, to prevent overwriting if user made customized views
-#index
-if [[ ! -f ${dir}/index.blade.php ]];
-    touch ${dir}/index.blade.php #TODO
-fi
-
-#show
-if [[ ! -f ${dir}/show.blade.php ]];
-    touch ${dir}/show.blade.php #TODO
-fi
-
-#create
-if [[ ! -f ${dir}/create.blade.php ]];
-    touch ${dir}/create.blade.php #TODO
-fi
-
-#edit
-if [[ ! -f ${dir}/edit.blade.php ]];
-    touch ${dir}/edit.blade.php #TODO
-fi
+done < models.txt
