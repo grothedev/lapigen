@@ -25,7 +25,7 @@
 #NOTE: you will have to manually change the type of the input tag if needed
 
 ### GLOBAL VARIABLES ###
-#map table column types (from migration file) to html input tags
+#map table column types (from migration file) to html input tags so we can write the html form
 declare -A htmlInputTypes
 htmlInputTypes["integer"]="number"
 htmlInputTypes["float"]="number"
@@ -39,15 +39,22 @@ htmlFormCreateTemplate=`cat templates/input_simple.template.html`
 model=$1
 model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
 model_plural=`./pluralize ${model_LC} | tail -n 1`
+formFile="resources/views/${model_LC}/edit.blade.php"
 
 ### FUNCTIONS ###
 #insert input element into the form html file
 #args: [input type] [input name]
 function insertInput {
     if [[ -z $1 && -z $2 ]]; then return -1; fi
-    sed '/csrf_field/a \n${htmlInputTemplate}' 
+    sed -i "/csrf_field/r templates/input_simple.template.html" $formFile
+    sed -i "s/--field--/${2}/g" $formFile
+    sed -i "s/--input_type--/${1}/g" $formFile
+    if [[ $3 ]]; then
+        sed -i "s/--field_label--/${3}/g" $formFile
+    else
+        sed -i "s/--field_label--/${2}/g" $formFile
+    fi
 }
-
 
 
 ### PROGRAM ###
@@ -74,7 +81,7 @@ for f in `ls database/migrations/ `; do
         migration_file="database/migrations/"${f}
     fi
 done
-echo $migration_file
+echo echo "Using migration: "$migration_file
 
 if [[ ! -f ${migration_file} ]]; then
     echo "migration file does not exist in app/Models/ , continue? (y/n)"
@@ -88,27 +95,33 @@ else
     use_migration=true #get fields from migration file instead of models
 fi
 
-#model fields/attributes and their datatypes
-fields=()
-types=()
 
+#now writing the .blade.php file for the form
+
+#model fields/attributes and their datatypes
+declare -A fields #=()
+declare -A types #=()
 if [[ ${use_migration} ]]; then
-    getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\)` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
-    #IFS='$'
-    for line in ${getfieldsresult}; do
-        f=`echo $line | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g"`
-        t=`echo $line | sed "s/.*\>\([A-Za-z]\)(.*/\1/g"`
-        fields+=($f)
-        types+=($t)
-    done
+    #use the fields and datatypes from the migration file
     if [[ ! -f resources/views/${model_LC} ]]; then
         mkdir -p resources/views/${model_LC}
     fi
     cp templates/form_edit.template.html resources/views/${model_LC}/edit.blade.php
-    for i in ${fields[#]}; do
-        echo "inserting "$fields[$i]", "$types[$1]
-        insertInput $f
+    getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\) | tr -d '\n'` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
+    IFS='$'
+    for line in ${getfieldsresult}; do
+        f=`echo "$line" | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g" | head -n 1`
+        t=`echo "$line" | sed "s/.*>\([A-Za-z]*\)(.*/\1/g" | head -n 1`
+        if [[ ! $f =~ ^[A-Za-z0-9]* || $f =~ [\ ] ]]; then continue; fi
+        echo $f" valid"
+        fields+=($f)
+        types+=($t)
+        echo "inserting "$f", "$t
+        insertInput $t $f
     done
+    sed -i 's/--submit_label--/Update/g' $formFile
+    exit 0
+    #TODO also write a javascript page and embeddable widget
 else
     foundmodel=false
     while read m; do

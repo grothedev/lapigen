@@ -50,4 +50,7 @@ sed -i "s/--model--/${model}/g" $cf
 sed -i "s/--model_lowercase--/${model_LC}/g" $cf
 sed -i "s/--model_plural--/${model_plural}/g" $cf
 sed -i "s/^ *--.*-- *$//g" $cf #remove lines that start & end with "--", accounting for whitespace
+
+echo "Route::resource('${model_plural}', '${model}Controller');" >> routes/web.php  #there is no closing php tag in web.php
+
 echo "Done."

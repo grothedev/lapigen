@@ -23,20 +23,8 @@
 
 ver=`./artisan --version | cut -d' ' -f3 | cut -d'.' -f1`  #check if laravel version >7 to use app/Models/
 
-
-function rm_(){
-    echo "  removing "${1}
-    #rm ${1}
-    mv ${1} .lapigen_bak/ 
-}
-
-#folder to place the removed files in case of restore
-if [[ ! -f .lapigen_bak ]]; then
-    mkdir .lapigen_bak
-fi
-
 while read m; do
-    if [[ -z ${m} || ${m:0:1} == "#" ]]; then #this line is a comment or blank
+     if [[ -z ${m} || ${m:0:1} == "#" ]]; then #this line is a comment or blank
         continue;
     fi
     if [[ ${m:0:1} == "-" ]]; then
@@ -49,14 +37,6 @@ while read m; do
         exit -1
     fi
 
-    echo ${m}
-    if [[ $((ver)) -gt 7 ]]; then 
-        rm_ "app/Models/${m}.php"
-    else
-        rm_ "app/${m}.php"
-    fi
-    migrationfile=`ls database/migrations/ | grep -i ${m:0:3}` #first few chars in case of plural spelling complication
-    if [[ $migrationfile ]]; then rm_ "database/migrations/${migrationfile}"; fi
-    rm_ "app/Http/Controllers/${m}Controller.php"
-
+    echo "removing routes for ${m}"
+    sed -i "/${m}/d" routes/web.php
 done < models.txt

@@ -78,7 +78,7 @@ for f in `ls database/migrations/ `; do
         migration_file="database/migrations/"${f}
     fi
 done
-echo $migration_file
+echo "Using migration: "$migration_file
 
 if [[ ! -f ${migration_file} ]]; then
     echo "migration file does not exist in app/Models/ , continue? (y/n)"
@@ -92,11 +92,14 @@ else
     use_migration=true #get fields from migration file instead of models
 fi
 
+
+#now writing the .blade.php file for the form
+
 #model fields/attributes
 declare -A fields #=()
 declare -A types #=()
-
 if [[ ${use_migration} ]]; then
+    #use the fields and datatypes from the migration file
     if [[ ! -f resources/views/${model_LC} ]]; then
         mkdir -p resources/views/${model_LC}
     fi
@@ -116,6 +119,7 @@ if [[ ${use_migration} ]]; then
     done
     sed -i 's/--submit_label--/Create/g' $formFile
     exit 0
+    #TODO also write a javascript page and embeddable widget
 else
     echo "did not find migration file. using models.txt file. THIS FUNCTIONALITY IS CURRENTLY NOT FULLY IMPLEMENTED"
     foundmodel=false
