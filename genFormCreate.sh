@@ -31,6 +31,8 @@ htmlInputTypes["integer"]="number"
 htmlInputTypes["float"]="number"
 htmlInputTypes["string"]="text"
 htmlInputTypes["dateTime"]="datetime-local"
+htmlInputTypes["date"]="date"
+htmlInputTypes["time"]="time"
 htmlInputTypes["shortText"]="textarea"
 htmlInputTypes["mediumText"]="textarea"
 htmlInputTypes["longText"]="textarea"
@@ -53,7 +55,7 @@ function insertInput {
         sed -i "/csrf_field/r templates/input_textarea.template.html" $formFile
     else
         sed -i "/csrf_field/r templates/input_simple.template.html" $formFile
-        sed -i "s/--input_type--/${1}/g" $formFile
+        sed -i "s/--input_type--/${htmlInputTypes[${1}]}/g" $formFile
     fi
     sed -i "s/--field--/${2}/g" $formFile
     if [[ $3 ]]; then
