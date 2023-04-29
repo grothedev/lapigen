@@ -10,8 +10,6 @@ instructions:
     4. use 'genRelatedFiles.sh' to generate the form views for REST actions and/or controllers for all or some models
     5. write code manually as needed: validation, authentication, other specific functionality, foreign database relationships, routes
 
-    TODO: genRelatedFiles.sh is unnecessary since there are only two options and genModels.sh already makes controllers. probably best to have genProject.sh that calls each script, and remove generating anything but models from genModels.sh
-
 how this works:
 
     1. calls "artisan make:model" to make default model and migration files
@@ -31,14 +29,13 @@ TODO:
         - how redirections are specified
         - write the unauthorized page
         - should i actually use the laravel FormRequest, Validator, etc.?
-    - routes. use lowercase singular since the transformation is easier. though could also have plural redunancy. 
     - field fixer script
-    - write form files. (edit form)
-        - use examples in controllers of tanner's site. for example ids of has-many objects 
-        - i think create & edit are really the same except for a few small differences. so make them one script
+    - finish form and view files
+        - create & edit are done. 
+        - need to do vue.js versions too
+    - incude api as separate from normal views
     - validation rules
     - model relationships (is-a, has-a, etc.)
-    - routes
     - generate admin pages for editing
     - use other models for datatype, and have the foreign key relationship generated
 

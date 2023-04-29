@@ -110,9 +110,9 @@ if [[ ${use_migration} ]]; then
     getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\) | tr -d '\n'` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
     IFS='$'
     for line in ${getfieldsresult}; do
-        f=`echo "$line" | sed "s/.*'\([A-Za-z0-9]*\)'.*/\1/g" | head -n 1`
+        f=`echo "$line" | sed "s/.*'\([A-Za-z0-9_]*\)'.*/\1/g" | head -n 1`
         t=`echo "$line" | sed "s/.*>\([A-Za-z]*\)(.*/\1/g" | head -n 1`
-        if [[ ! $f =~ ^[A-Za-z0-9]* || $f =~ [\ ] ]]; then continue; fi
+        if [[ ! $f =~ ^[A-Za-z0-9_]* || $f =~ [\ ] ]]; then continue; fi
         echo $f" valid"
         fields+=($f)
         types+=($t)

@@ -79,6 +79,6 @@ while read m; do
     
 done < models.txt
 
-if [[ ! `grep "modelinfo.blade.php" routes/web.php` ]]; then
+if [[ -z `grep "modelinfo.blade.php" routes/web.php` ]]; then
     echo "Route::view('m', 'modelinfo');" >> routes/web.php  #there is no closing php tag in web.php
 fi
