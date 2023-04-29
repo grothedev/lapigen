@@ -107,6 +107,7 @@ if [[ ${use_migration} ]]; then
         mkdir -p resources/views/${model_LC}
     fi
     cp templates/form_edit.template.html resources/views/${model_LC}/edit.blade.php
+    sed -i "s/--model_controller--/${model}Controller/g" $formFile
     getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\) | tr -d '\n'` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
     IFS='$'
     for line in ${getfieldsresult}; do
