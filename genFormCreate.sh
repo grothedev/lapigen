@@ -31,6 +31,9 @@ htmlInputTypes["integer"]="number"
 htmlInputTypes["float"]="number"
 htmlInputTypes["string"]="text"
 htmlInputTypes["dateTime"]="datetime-local"
+htmlInputTypes["shortText"]="textarea"
+htmlInputTypes["mediumText"]="textarea"
+htmlInputTypes["longText"]="textarea"
 
 htmlInputTemplate=`cat templates/input_simple.template.html`
 htmlTextAreaTemplate=`cat templates/input_textarea.template.html`
@@ -46,9 +49,13 @@ formFile="resources/views/${model_LC}/create.blade.php"
 #args: [input type] [input name] [input label (optional)]
 function insertInput {
     if [[ -z $1 && -z $2 ]]; then return -1; fi
-    sed -i "/csrf_field/r templates/input_simple.template.html" $formFile
+    if [[ ${htmlInputTypes[${1}]} == "textarea" ]]; then
+        sed -i "/csrf_field/r templates/input_textarea.template.html" $formFile
+    else
+        sed -i "/csrf_field/r templates/input_simple.template.html" $formFile
+        sed -i "s/--input_type--/${1}/g" $formFile
+    fi
     sed -i "s/--field--/${2}/g" $formFile
-    sed -i "s/--input_type--/${1}/g" $formFile
     if [[ $3 ]]; then
         sed -i "s/--field_label--/${3}/g" $formFile
     else
