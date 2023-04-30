@@ -32,7 +32,7 @@ TODO:
     - field fixer script
     - finish form and view files
         - create & edit are done. 
-        - need to do vue.js versions too
+        - need to do vue.js versions too. map existing html forms to dynamic vue components. 
     - incude api as separate from normal views
     - validation rules
     - model relationships (is-a, has-a, etc.)

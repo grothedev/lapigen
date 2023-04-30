@@ -37,6 +37,10 @@ htmlInputTypes["shortText"]="textarea"
 htmlInputTypes["mediumText"]="textarea"
 htmlInputTypes["longText"]="textarea"
 
+#flags to set what type of forms to generate
+USE_VUE=false
+USE_BLADE=false
+
 htmlInputTemplate=`cat templates/input_simple.template.html`
 htmlTextAreaTemplate=`cat templates/input_textarea.template.html`
 htmlFormCreateTemplate=`cat templates/input_simple.template.html`
@@ -46,10 +50,12 @@ model_LC=`echo ${model} | tr '[:upper:]' '[:lower:]'`
 model_plural=`./pluralize ${model_LC} | tail -n 1`
 formFile="resources/views/${model_LC}/create.blade.php"
 
+
+
 ### FUNCTIONS ###
 #insert input element into the form html file
 #args: [input type] [input name] [input label (optional)]
-function insertInput {
+function insertInput { #todo map<sed-string, 2replace2>. so can run func to iterate through and apply each regex replacemen 
     if [[ -z $1 && -z $2 ]]; then return -1; fi
     if [[ ${htmlInputTypes[${1}]} == "textarea" ]]; then
         sed -i "/csrf_field/r templates/input_textarea.template.html" $formFile
@@ -155,3 +161,11 @@ else
     echo $fields
 fi
 
+if [[ $USE_VUE ]]; then
+    #add the controller function to pass application data and state to the javascript page via @json() directive.
+
+    #grab the html from template.vue file, sed it with proper values for the model+fields of interest, inject that text into the correct location of the vue form template text.
+        #if '.js', components -> '[modelname]-[action]-form' > template: `[sedded template form text]`
+        #if '.vue', inside <template> tags. 
+    #values to sed, props to pass
+fi

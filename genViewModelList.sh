@@ -33,6 +33,7 @@ htmlViewTemplate=`cat templates/view_modellist.template.html`
 htmlModelListElementTemplate=`cat templates/li_model.template`
 viewFile="./resources/views/modelinfo.blade.php"
 
+
 ### FUNCTIONS ###
 #insert <li><a> into the list
 #args: []
@@ -79,6 +80,6 @@ while read m; do
     
 done < models.txt
 
-if [[ -z `grep "modelinfo.blade.php" routes/web.php` ]]; then
+if [[ -z `grep "modelinfo" routes/web.php` ]]; then
     echo "Route::view('m', 'modelinfo');" >> routes/web.php  #there is no closing php tag in web.php
 fi

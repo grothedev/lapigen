@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/python3
 
 ###
 # Laravel API Model and Form Generation Application
@@ -20,11 +20,16 @@
 # along with Laravel API Model and Form Generation Application.  If not, see <https://www.gnu.org/licenses/>.
 ###
 
+import os
+import sys
+import subprocess
+
 prev=""
-props=() #array of properties of model
-rprops=false #reading properties of model
-columnTypes=() #array of datatypes of the properties, in same order as props array
+props=[] #array of properties of model
+rprops=False #reading properties of model
+columnTypes=[] #array of datatypes of the properties, in same order as props array
 model="" #the name of the model currently being constructed
+models=[]
 ver=`./artisan --version | cut -d' ' -f3 | cut -d'.' -f1`  #check if laravel version >7 to use app/Models/
 
 
@@ -122,6 +127,7 @@ while read m; do
         else #this is the start of a definition of a new model. write the previous one to application
             if [[ -z $model ]]; then
                 model=$m
+                models+=(${m})
                 continue;
             fi
             echo "making model: "${model}
@@ -130,6 +136,7 @@ while read m; do
             props=()
             columnTypes=()
             model=$m #new model name
+            models+=(${m})
         fi
     elif [ ${m:0:1} == "-" ]; then
         rprops=true
@@ -140,6 +147,7 @@ while read m; do
 done < models.txt
 makeModel #one more model to make
 
+./genSiteController.sh ${models[@]} #the main site controller for functions not specific to models
 ./genViewModeList.sh #a page for meta-info on each model 
 
 #What is left to do after this script runs:
