@@ -11,6 +11,8 @@ cp -n templates/template.blade.php resources/views/template.blade.php
 cp -n templates/view_base.template.blade.php $viewFile
 cp -n templates/BladeServiceProvider.php app/Providers/
 
+sed -i "/'providers' =>/a \        App\\\Providers\\\BladeServiceProvider::class,\n" config/app.php
+
 if [[ ! -f app/Http/Controllers/SiteController.php ]]; then
     ./genSiteController.php
 fi
