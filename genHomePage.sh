@@ -18,5 +18,6 @@ if [[ ! -f app/Http/Controllers/SiteController.php ]]; then
 fi
 
 echo "Route::view('/', 'home');" >> routes/web.php
+echo "Auth::routes();" >> routes/web.php
 
 #sed -i "s/--.*--//g" $viewFile

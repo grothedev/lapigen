@@ -24,6 +24,17 @@
 #TODO: custom redirect upon unauth
 #TODO: does laravel generate plural view files or what?
 
+FORCE=false #if file already exists, skip user confirm or not
+
+while getopts "f" opt; do
+    case $opt in
+        f)
+            FORCE=true
+            shift
+            ;;
+    esac
+done
+
 if [[ $1 ]]; then
     model=$1
 else
@@ -33,7 +44,7 @@ fi
 
 cf="app/Http/Controllers/${model}Controller.php"
 
-if [[ -f $cf ]]; then
+if [[ ! $FORCE && -f $cf ]]; then
     echo "controller file ${cf} already exists. are you sure? (y/n)"
     read c
     if [[ ! ${c,,} == 'y' ]]; then
@@ -52,5 +63,7 @@ sed -i "s/--model_plural--/${model_plural}/g" $cf
 sed -i "s/^ *--.*-- *$//g" $cf #remove lines that start & end with "--", accounting for whitespace
 
 echo "Route::resource('${model_plural}', '${model}Controller');" >> routes/web.php  #there is no closing php tag in web.php
+
+
 
 echo "Done."

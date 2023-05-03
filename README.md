@@ -16,6 +16,7 @@ how this works:
     2. replaces and inserts the appropriate text in those files
     3. uses template files, such as "Controller.template.php" to copy into the project, rename, and replace the variables with the correct values, such as model or field
     4. leaves "//TODO" comments where developer must pick up
+    5. if using user authentication, need "laravel/ui" package
 
 Name ideas:
 
@@ -29,12 +30,13 @@ TODO:
         - how redirections are specified
         - write the unauthorized page
         - should i actually use the laravel FormRequest, Validator, etc.?
+        - creation of instances of models
     - field fixer script
     - finish form and view files
         - create & edit are done. 
         - need to do vue.js versions too. map existing html forms to dynamic vue components. 
     - incude api as separate from normal views
-    - validation rules
+    - validation rules and auth rules for modifying models
     - model relationships (is-a, has-a, etc.)
     - generate admin pages for editing
     - use other models for datatype, and have the foreign key relationship generated

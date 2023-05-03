@@ -31,7 +31,7 @@ class --model--Controller extends Controller
         if (Auth::user() != null){ //TODO user conditions? 
             return view('--model_lowercase--.create');//, compact(''));
         } else {
-            $msg = "You are not authorized to view this page,". Auth::user()->name .".";
+            $msg = "You are not authorized to view this page.";
             return redirect('/unauthorized', compact('msg'));
         }
     }
@@ -52,7 +52,7 @@ class --model--Controller extends Controller
             $msg = "--model-- added. id=".$--model_lowercase--->id;
             return view('--model_lowercase--.show', compact('--model_lowercase--', 'msg'));
         } else {
-            $msg = "You are not authorized,". Auth::user()->name .".";
+            $msg = "You are not authorized.";
             return redirect('/unauthorized', compact('msg'));
         }
     }
@@ -68,7 +68,7 @@ class --model--Controller extends Controller
         if (Auth::user() != null){ //TODO user conditions
             return view('--model_lowercase--.show', compact('--model_lowercase--'));
         } else {
-            $msg = "You are not authorized to view this page,". Auth::user()->name .".";
+            $msg = "You are not authorized to view this page.";
             return redirect('/unauthorized', compact('msg'));
         }
     }
@@ -84,7 +84,7 @@ class --model--Controller extends Controller
         if (Auth::user() != null){ //TODO user conditions
             return view('--model_lowercase--.edit', compact('--model_lowercase--'));
         } else {
-            $msg = "You are not authorized to view this page,". Auth::user()->name .".";
+            $msg = "You are not authorized to view this page.";
             return redirect('/unauthorized', compact('msg'));
         }
     }
@@ -108,7 +108,7 @@ class --model--Controller extends Controller
             $msg = 'item updated';
             return view('--model_lowercase--.show', compact('--model_lowercase--', 'msg'));
         } else {
-            $msg = "You are not authorized,". Auth::user()->name .".";
+            $msg = "You are not authorized.";
             return redirect('/unauthorized', compact('msg'));
         }
     }
@@ -125,7 +125,7 @@ class --model--Controller extends Controller
             $--model_lowercase--->delete();
             return redirect('/--model_lowercase--');
         } else {
-            $msg = "You are not authorized,". Auth::user()->name .".";
+            $msg = "You are not authorized.";
             return redirect('/unauthorized', compact('msg'));
         }
     }
