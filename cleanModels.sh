@@ -23,7 +23,6 @@
 
 ver=`./artisan --version | cut -d' ' -f3 | cut -d'.' -f1`  #check if laravel version >7 to use app/Models/
 
-
 function rm_(){
     echo "  removing "${1}
     #rm ${1}

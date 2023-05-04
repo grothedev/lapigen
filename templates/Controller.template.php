@@ -107,7 +107,7 @@ class --model--Controller extends Controller
             $req->validate([]); //TODO
 
             $--model_lowercase-- = --model--::findOrFail($id);
-            if ($req->--field--) $--model_lowercase--->--field-- = $req->--field--;
+            
             $--model_lowercase--->save();
 
             $msg = 'item updated';

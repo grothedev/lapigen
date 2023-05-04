@@ -62,8 +62,9 @@ sed -i "s/--model_lowercase--/${model_LC}/g" $cf
 sed -i "s/--model_plural--/${model_plural}/g" $cf
 sed -i "s/^ *--.*-- *$//g" $cf #remove lines that start & end with "--", accounting for whitespace
 
-if [[ ! `grep "function ctrler"` ]]; then
+if [[ ! `grep "function ctrler" routes/web.php` ]]; then
     cat stubs/routes_ctlrer_function >> routes/web.php
+    echo "" >> routes/web.php
 fi
 
 #setup create/update using the fields and datatypes from the migration file
@@ -88,8 +89,7 @@ fi
 
 
 
-echo "Route::resource('${model_plural}', ctrler('${model}');" >> routes/web.php  #there is no closing php tag in web.php
-
+echo "Route::resource('${model_plural}', ctrler('${model}'));" >> routes/web.php  #there is no closing php tag in web.php
 
 
 echo "Done."
