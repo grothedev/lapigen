@@ -47,7 +47,12 @@ class --model--Controller extends Controller
         if (Auth::user() != null){ //TODO user conditions
             $request->validate([]); //TODO
             
-            $--model_lowercase-- = --model--::create([]); //TODO
+            $fieldsArray = [];
+            foreach (--model--::$fields as $field){
+                array_push($fieldsArray, [$field => $request->$field]);
+            }
+
+            $--model_lowercase-- = --model--::create([ $fieldsArray ]); //customize this if you need to
 
             $msg = "--model-- added. id=".$--model_lowercase--->id;
             return view('--model_lowercase--.show', compact('--model_lowercase--', 'msg'));
@@ -102,7 +107,7 @@ class --model--Controller extends Controller
             $req->validate([]); //TODO
 
             $--model_lowercase-- = --model--::findOrFail($id);
-            //TODO apply updates
+            if ($req->--field--) $--model_lowercase--->--field-- = $req->--field--;
             $--model_lowercase--->save();
 
             $msg = 'item updated';

@@ -30,7 +30,7 @@ TODO:
         - how redirections are specified
         - write the unauthorized page
         - should i actually use the laravel FormRequest, Validator, etc.?
-        - creation of instances of models
+        - creation of instances of models. will need to define what fields are allowed to be updated in the models.txt, and validation rules. 
     - field fixer script
     - finish form and view files
         - create & edit are done. 

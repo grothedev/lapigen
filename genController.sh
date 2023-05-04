@@ -62,7 +62,33 @@ sed -i "s/--model_lowercase--/${model_LC}/g" $cf
 sed -i "s/--model_plural--/${model_plural}/g" $cf
 sed -i "s/^ *--.*-- *$//g" $cf #remove lines that start & end with "--", accounting for whitespace
 
-echo "Route::resource('${model_plural}', '${model}Controller');" >> routes/web.php  #there is no closing php tag in web.php
+if [[ ! `grep "function ctrler"` ]]; then
+    cat stubs/routes_ctlrer_function >> routes/web.php
+fi
+
+#setup create/update using the fields and datatypes from the migration file
+#for f in `ls database/migrations/ `; do
+#    fNoUnderscore=`echo ${f} | sed 's/_//g'`
+#    if [[ $fNoUnderscore == *${model_plural}* ]]; then
+#        migration_file="database/migrations/"${f}
+#    fi
+#done
+#echo "Using migration: "$migration_file
+#declare -A fields #=()
+#getfieldsresult=`cat ${migration_file} | grep "\$table-"  | grep -v foreign | grep -v timestamp | grep -v id\(\) | tr -d '\n'` # | sed "s/.*'\([A-Za-z]*\)'.*/\1/g"` #explanation: grab the column names out from the quotes, excluding foreign key definition since it would be duplicate
+#IFS='$'
+#for line in ${getfieldsresult}; do
+#   f=`echo "$line" | sed "s/.*'\([A-Za-z0-9_]*\)'.*/\1/g" | head -n 1`
+#    t=`echo "$line" | sed "s/.*>\([A-Za-z]*\)(.*/\1/g" | head -n 1`
+#    if [[ ! $f =~ ^[A-Za-z0-9_]* || $f =~ [\ ] ]]; then continue; fi
+#    echo $f" valid"
+#    fields+=($f)
+#    sed -i "s/'--field--' => \$request->--field--,/{p;s//$f/;}" $cf
+#done
+
+
+
+echo "Route::resource('${model_plural}', ctrler('${model}');" >> routes/web.php  #there is no closing php tag in web.php
 
 
 

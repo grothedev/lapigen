@@ -52,9 +52,12 @@ function makeModel {
     do
         fields+="'"$p"', "
     done
-    #insert fillable values into model definition file
+    #insert fillable values into model definition file, also static access to all fields for controllers convenience
     #sed -i "s!{!{\n    protected \$fillable = [$fields];!g" ${model_filename}
     sed -i "s!}!    protected \$fillable = [$fields];\n\n}!g" ${model_filename}
+    sed -i "s!}!    public static \$fields = [$fields];\n\n}!g" ${model_filename}
+    
+
 
     #make the controller
     ./genController.sh ${model}
@@ -140,7 +143,7 @@ while read m; do
 done < models.txt
 makeModel #one more model to make
 
-./genViewModeList.sh #a page for meta-info on each model 
+./genViewModelList.sh #a page for meta-info on each model 
 
 #What is left to do after this script runs:
 # relationships between eloquent models 
